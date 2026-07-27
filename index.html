@@ -1,0 +1,439 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>编制管理系统产品架构图</title>
+  <style>
+    :root {
+      --bg: #f5f8f6;
+      --ink: #15211b;
+      --muted: #607068;
+      --line: #cbd8d1;
+      --card: #ffffff;
+      --green: #1f7a4d;
+      --green-soft: #e7f3ed;
+      --blue: #2f6f9f;
+      --blue-soft: #e8f1f7;
+      --orange: #cf7a2a;
+      --orange-soft: #fbefe3;
+      --purple: #735aa6;
+      --purple-soft: #f0ecf8;
+      --shadow: 0 14px 34px rgba(25, 47, 37, .08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", Arial, sans-serif;
+    }
+    .page {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 28px 30px 34px;
+    }
+    .titlebar {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 18px;
+      padding-bottom: 14px;
+      border-bottom: 2px solid var(--line);
+    }
+    h1 {
+      margin: 0;
+      font-size: 34px;
+      font-weight: 650;
+      letter-spacing: .02em;
+    }
+    .subtitle {
+      color: var(--muted);
+      font-size: 17px;
+      text-align: right;
+      white-space: nowrap;
+    }
+    .layer {
+      position: relative;
+      margin-top: 14px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: rgba(255,255,255,.54);
+      display: grid;
+      grid-template-columns: 112px minmax(0, 1fr);
+      gap: 14px;
+      align-items: stretch;
+    }
+    .layer-title {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100%;
+      padding: 14px 10px;
+      border-radius: 16px;
+      background: var(--ink);
+      color: #fff;
+      text-align: center;
+      gap: 8px;
+    }
+    .layer-title .main {
+      font-size: 20px;
+      font-weight: 650;
+      line-height: 1.25;
+    }
+    .layer-title .sub {
+      color: rgba(255,255,255,.78);
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 1.25;
+    }
+    
+    .layer-content {
+      min-width: 0;
+    }
+    .upstream-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1.4fr 2.2fr;
+      gap: 14px;
+      align-items: stretch;
+    }
+    .downstream-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      align-items: stretch;
+    }
+    .system-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .domain {
+      min-height: 310px;
+      padding: 16px;
+      border-radius: 20px;
+      background: var(--card);
+      border: 2px solid transparent;
+      box-shadow: var(--shadow);
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      gap: 12px;
+    }
+    .domain.basis { border-color: var(--blue); background: linear-gradient(180deg, var(--blue-soft), #fff 42%); }
+    .domain.pool { border-color: var(--green); background: linear-gradient(180deg, var(--green-soft), #fff 42%); transform: translateY(-4px); }
+    .domain.report { border-color: var(--orange); background: linear-gradient(180deg, var(--orange-soft), #fff 42%); }
+    .domain-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .domain-name {
+      font-size: 24px;
+      font-weight: 650;
+    }
+    .domain-tag {
+      padding: 5px 10px;
+      border-radius: 999px;
+      color: var(--muted);
+      background: rgba(255,255,255,.72);
+      border: 1px solid var(--line);
+      font-size: 14px;
+      white-space: nowrap;
+    }
+    .domain-desc {
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.55;
+      min-height: 50px;
+    }
+    .module-list {
+      display: grid;
+      gap: 10px;
+      align-content: start;
+    }
+    .module {
+      padding: 11px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.74);
+    }
+    .module strong {
+      display: block;
+      font-size: 17px;
+      font-weight: 650;
+      margin-bottom: 3px;
+    }
+    .module span {
+      display: block;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .domain-output {
+      border-top: 1px dashed var(--line);
+      padding-top: 10px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .system-card, .support-card {
+      padding: 14px 16px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: var(--card);
+      min-height: 94px;
+      box-shadow: 0 8px 20px rgba(25,47,37,.05);
+    }
+    .system-card.up { background: var(--blue-soft); border-color: color-mix(in srgb, var(--blue) 45%, var(--line)); }
+    .system-card.down { background: var(--orange-soft); border-color: color-mix(in srgb, var(--orange) 42%, var(--line)); }
+    .support-card { background: var(--purple-soft); border-color: color-mix(in srgb, var(--purple) 42%, var(--line)); min-height: 88px; display: grid; align-content: center; }
+    .system-card strong, .support-card strong {
+      display: block;
+      font-size: 19px;
+      font-weight: 650;
+      margin-bottom: 6px;
+    }
+    .system-card span, .support-card span {
+      display: block;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.45;
+    }
+    .flow-note {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin: 9px 0 -3px;
+      color: var(--green);
+      font-size: 16px;
+      font-weight: 650;
+    }
+    .flow-note::before, .flow-note::after {
+      content: "";
+      height: 2px;
+      flex: 1;
+      background: linear-gradient(90deg, transparent, var(--green), transparent);
+    }
+    .support-row {
+      margin-top: 14px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: rgba(255,255,255,.54);
+      display: grid;
+      grid-template-columns: 112px minmax(0, 1fr);
+      gap: 14px;
+      align-items: stretch;
+    }
+    .support-title {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 14px 10px;
+      border-radius: 16px;
+      background: var(--purple);
+      color: #fff;
+      text-align: center;
+      gap: 8px;
+    }
+    .support-title .main {
+      font-size: 20px;
+      font-weight: 650;
+      line-height: 1.25;
+    }
+    .support-title .sub {
+      color: rgba(255,255,255,.82);
+      font-size: 13px;
+      line-height: 1.25;
+    }
+    
+    .bottom-note {
+      margin-top: 14px;
+      padding: 11px 14px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.68);
+      border: 1px dashed var(--line);
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.45;
+    }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 20px;
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .legend span { display: inline-flex; align-items: center; gap: 7px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--green); display: inline-block; }
+    .dot.blue { background: var(--blue); }
+    .dot.orange { background: var(--orange); }
+    .dot.purple { background: var(--purple); }
+    @media (max-width: 1100px) {
+      .layer { grid-template-columns: 1fr; }
+      .layer-title { min-height: auto; }
+      .upstream-grid, .support-row { grid-template-columns: 1fr; }
+      .downstream-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .system-grid { grid-template-columns: 1fr; }
+      .domain { min-height: auto; transform: none !important; }.subtitle { white-space: normal; }
+    }
+    @media (max-width: 680px) {
+      .page { padding: 18px; }
+      .titlebar { display: grid; }
+      .subtitle { text-align: left; }
+      h1 { font-size: 28px; }
+      .downstream-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="titlebar">
+      <h1>编制管理系统产品架构图</h1>
+    </header>
+
+    <section class="layer" aria-label="上游系统">
+      <div class="layer-title"><span class="main">上游系统</span><span class="sub">输入约束</span></div>
+      <div class="layer-content">
+      <div class="upstream-grid">
+        <div class="system-card up">
+          <strong>预算系统</strong>
+          <span>提供可用预算和人力成本边界</span>
+        </div>
+        <div class="system-card up">
+          <strong>DataWork</strong>
+          <span>同步预算数据到本地表</span>
+        </div>
+        <div class="system-card up">
+          <strong>预算输入</strong>
+          <span>形成预算额度、成本上限、预算范围和白名单等控制口径</span>
+        </div>
+      </div>
+      </div>
+    </section>
+
+    <div class="flow-note">预算约束与业务依据进入编制管理系统</div>
+
+    <section class="layer" aria-label="编制管理系统三大功能域">
+      <div class="layer-title"><span class="main">编制管理系统</span><span class="sub">核心能力</span></div>
+      <div class="layer-content">
+      <div class="system-grid">
+        <article class="domain basis">
+          <div class="domain-head">
+            <div class="domain-name">编制依据</div>
+            <div class="domain-tag">来源与核定基础</div>
+          </div>
+          <div class="domain-desc">先把“岗位是什么、预算够不够、为什么要这些编制”说清楚，再进入统一编制池管理。</div>
+          <div class="module-list">
+            <div class="module"><strong>标准岗位画像</strong><span>维护岗位序列、职务、薪级、职责和任职资格</span></div>
+            <div class="module"><strong>预算数据同步</strong><span>维护预算额度、薪酬区间、预算范围和白名单</span></div>
+            <div class="module"><strong>组织岗位口径</strong><span>统一组织、岗位和编制统计口径</span></div>
+            <div class="module"><strong>编制测算与申请</strong><span>结合预算、岗位和业务依据，支持测算和申请</span></div>
+            <div class="module"><strong>版本与生效期</strong><span>记录每版编制的生效时间、失效时间和来源</span></div>
+          </div>
+          <div class="domain-output">输出：岗位画像、预算依据、编制版本、来源说明</div>
+        </article>
+
+        <article class="domain pool">
+          <div class="domain-head">
+            <div class="domain-name">统一编制池</div>
+            <div class="domain-tag">核心控制中枢</div>
+          </div>
+          <div class="domain-desc">集中管理每个组织、每类岗位还有多少编制可用，并把预算校验、招聘占用和人员占编串起来。</div>
+          <div class="module-list">
+            <div class="module"><strong>预编制管理</strong><span>保存已确认的组织岗位预编制数量</span></div>
+            <div class="module"><strong>实际占编管理</strong><span>正式员工和灵活用工都会占用同一个编制池</span></div>
+            <div class="module"><strong>招聘需求管理</strong><span>管理需求人数、已锁定人数和已占用人数</span></div>
+            <div class="module"><strong>预算与编制联合校验</strong><span>提交需求时同时检查编制数量、预算余额和薪级匹配</span></div>
+            <div class="module"><strong>占用与释放机制</strong><span>招聘先锁定，入职转占用；离职交接期可临时超编，结束后释放/恢复</span></div>
+          </div>
+          <div class="domain-output">输出：可补人数、校验结果、占用状态、释放/恢复结果</div>
+        </article>
+
+        <article class="domain report">
+          <div class="domain-head">
+            <div class="domain-name">监控报表</div>
+            <div class="domain-tag">分析与治理闭环</div>
+          </div>
+          <div class="domain-desc">把编制有没有超、哪里缺人、数据是否异常用报表和预警展示出来。</div>
+          <div class="module-list">
+            <div class="module"><strong>缺编 / 超编监控</strong><span>查看哪些组织缺编、超编或刚好满编</span></div>
+            <div class="module"><strong>招聘需求监控</strong><span>查看需求人数、锁定人数、占用人数和关闭状态</span></div>
+            <div class="module"><strong>预算与有效期预警</strong><span>提醒预算不足、薪级不匹配或编制版本即将到期</span></div>
+            <div class="module"><strong>同步异常监控</strong><span>提示 EHR 推送失败、预算同步异常、招聘平台同步失败</span></div>
+            <div class="module"><strong>AI 智能助手</strong><span>支持对话查询、快速定位目标，并生成分析提醒和处理建议</span></div>
+          </div>
+          <div class="domain-output">输出：看板、预警、异常清单、AI 查询与建议</div>
+        </article>
+      </div>
+      </div>
+    </section>
+
+    <section class="support-row" aria-label="辅助流程审批系统">
+      <div class="support-title"><span class="main">新 OA</span><span class="sub">流程审批</span></div>
+      <div class="support-card">
+        <span>负责审批预编制确认、调整和追加；审批通过后，结果回到编制管理系统生效。招聘需求审批仍由对应流程承接。</span>
+      </div>
+    </section>
+
+    <div class="flow-note">下游系统执行业务，人员与招聘结果回到编制池</div>
+
+    <section class="layer" aria-label="下游系统">
+      <div class="layer-title"><span class="main">下游系统</span><span class="sub">执行回写</span></div>
+      <div class="layer-content">
+      <div class="downstream-grid">
+        <div class="system-card down">
+          <strong>MOKA</strong>
+          <span>外部招聘需求、招聘进展和入职结果联动</span>
+        </div>
+        <div class="system-card down">
+          <strong>万紫千红</strong>
+          <span>内部招聘职位同步、关闭和调入结果联动</span>
+        </div>
+        <div class="system-card down">
+          <strong>EHR 2.0</strong>
+          <span>提供正式员工入职、调动、任免、离职结果，并接收部分业务待办</span>
+        </div>
+        <div class="system-card down">
+          <strong>SHR</strong>
+          <span>提供灵活用工的新增、减少结果；组织信息以 EHR 2.0 同步为准</span>
+        </div>
+      </div>
+      <div class="bottom-note">结果回写说明：招聘平台和 EHR/SHR 把招聘进展、入职、调动、任免、离职、灵活用工变化等结果同步回编制池，编制管理系统再更新锁定人数、占用人数、可补人数和相关预警。</div>
+      </div>
+    </section>
+
+    <footer class="legend">
+      <span><i class="dot blue"></i>上游：预算系统</span>
+      <span><i class="dot"></i>系统核心：编制依据 / 统一编制池 / 监控报表</span>
+      <span><i class="dot purple"></i>辅助：新 OA 流程审批</span>
+      <span><i class="dot orange"></i>下游：招聘与人力系统执行回写</span>
+    </footer>
+  </main>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
